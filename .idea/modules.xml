@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/bank-account-system/bank-account-system.iml" filepath="$PROJECT_DIR$/bank-account-system/bank-account-system.iml" />
+      <module fileurl="file://$PROJECT_DIR$/s-2022-java-uml-ais.iml" filepath="$PROJECT_DIR$/s-2022-java-uml-ais.iml" />
+    </modules>
+  </component>
+</project>
