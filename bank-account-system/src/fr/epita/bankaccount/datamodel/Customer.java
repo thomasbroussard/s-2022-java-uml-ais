@@ -7,6 +7,9 @@ public class Customer {
     private String name;
     private String address;
 
+
+    private double age;
+
     private List<Account> accountList;
 
     public Customer(String name, String address){
@@ -22,5 +25,22 @@ public class Customer {
             return;
         }
         this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+
+    public double getAge() {
+        return age;
+    }
+
+    public void setAge(double age) {
+        this.age = age;
     }
 }
