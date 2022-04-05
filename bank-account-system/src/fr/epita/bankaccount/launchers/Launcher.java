@@ -9,8 +9,8 @@ public class Launcher {
 
         Customer customer = new Customer("thomas", "paris");
 
-        customer.getName();
-
+        System.out.println(customer.getName());
+        System.out.println(customer.getAddress());
 
 
     }
