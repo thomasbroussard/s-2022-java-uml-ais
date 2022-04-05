@@ -2,6 +2,7 @@ package fr.epita.bankaccount.datamodel;
 
 import java.util.List;
 
+//this is a customer definition for the bank account system application
 public class Customer {
     private String name;
     private String address;
