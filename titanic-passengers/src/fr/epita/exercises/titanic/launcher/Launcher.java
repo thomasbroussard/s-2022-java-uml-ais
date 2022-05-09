@@ -52,6 +52,8 @@ public class Launcher {
         double[][] passengerMatrix = new double[passengers.size()][];
         int i = 0;
         for (Passenger passenger : passengers){
+
+            //passenger to vector
             double[] passengerAsVector = new double[6];
             passengerAsVector[0] = passenger.getPassengerId();
             passengerAsVector[1] = passenger.getSurvived();
@@ -63,8 +65,32 @@ public class Launcher {
             i++;
         }
         System.out.println(Arrays.deepToString(passengerMatrix));
+        // vector to passenger
 
+        List<Passenger> reconstructedPassengers = new ArrayList<>();
+        for (double[] passengerVector : passengerMatrix){
 
+            //vector to passenger
+            Passenger passenger = new Passenger(Double.valueOf(passengerVector[2]).intValue(),
+                    Double.valueOf(passengerVector[1]).intValue(),
+                    Double.valueOf(passengerVector[0]).intValue(),
+                    keyFromValue( Double.valueOf(passengerVector[3]).intValue(), sexEncoding),
+                    Double.valueOf(passengerVector[4]).intValue(),
+                    keyFromValue( Double.valueOf(passengerVector[5]).intValue(), embarkedEncoding));
+            reconstructedPassengers.add(passenger);
+        }
+
+        System.out.println(reconstructedPassengers.size());
+
+    }
+
+    public static String keyFromValue(Integer value, Map<String, Integer> map){
+        for (Map.Entry<String, Integer> entry : map.entrySet()){
+            if (entry.getValue().equals(value)){
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
 
