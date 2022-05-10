@@ -11,62 +11,53 @@ import java.util.stream.Collectors;
 
 public class Launcher {
 
+    private static final Map<String, Integer> sexEncoding = new LinkedHashMap<>();
+    static {
+        sexEncoding.put("male", 0);
+        sexEncoding.put("female", 1);
+    }
+
+    private static final Map<String, Integer> embarkedEncoding = new LinkedHashMap<>();
+    static {
+        embarkedEncoding.put("S", 0);
+        embarkedEncoding.put("Q", 1);
+        embarkedEncoding.put("C", 2);
+    }
+
     public static void main(String[] args) throws IOException {
         File file = new File("titanic-passengers/titanic.csv");
 
-        List<String> stringList = Files.readAllLines(file.toPath());
+        List<Passenger> passengers = getPassengers(file);
 
+        double[][] passengerMatrix = getPassengersMatrix(passengers, sexEncoding, embarkedEncoding);
 
-        stringList.remove(0);
-        System.out.println(stringList);
-        List<Passenger> passengers = new ArrayList<>();
+       visualize(passengers);
 
-        List<String> faultyPassengerIds = new ArrayList<>();
-        for (String line : stringList){
-            String[] parts = line.split(",");
-            System.out.println("pclass: " + parts[2]);
+      //  reconstructPassengersFromMatrix(sexEncoding, embarkedEncoding, passengerMatrix);
 
-            try {
-                Passenger p = new Passenger(Integer.parseInt(parts[2])
-                        , Integer.parseInt(parts[1])
-                        , Integer.parseInt(parts[0])
-                        , parts[3]
-                        , Integer.parseInt(parts[4])
-                        , parts[10]);
-                passengers.add(p);
-            }catch (Exception e){
-                e.printStackTrace();
-                faultyPassengerIds.add(parts[0]);
-            }
-        }
-        System.out.println(passengers);
-        System.out.println("faulty passengers size:" + faultyPassengerIds.size());
+    }
 
-        Map<String, Integer> sexEncoding = new LinkedHashMap<>();
-        sexEncoding.put("male", 0);
-        sexEncoding.put("female",1);
+    private static void reconstructPassengersFromMatrix(Map<String, Integer> sexEncoding, Map<String, Integer> embarkedEncoding, double[][] passengerMatrix) {
+        System.out.println(Arrays.deepToString(passengerMatrix));
+        // vector to passenger
 
-        Map<String, Integer> embarkedEncoding = new LinkedHashMap<>();
-        embarkedEncoding.put("S", 0);
-        embarkedEncoding.put("Q",1);
-        embarkedEncoding.put("C",2);
+        List<Passenger> reconstructedPassengers = new ArrayList<>();
+        for (double[] passengerVector : passengerMatrix){
 
-        double[][] passengerMatrix = new double[passengers.size()][];
-        int i = 0;
-        for (Passenger passenger : passengers){
-
-            //passenger to vector
-            double[] passengerAsVector = new double[6];
-            passengerAsVector[0] = passenger.getPassengerId();
-            passengerAsVector[1] = passenger.getSurvived();
-            passengerAsVector[2] = passenger.getPclass();
-            passengerAsVector[3] = sexEncoding.get(passenger.getSex());
-            passengerAsVector[4] = passenger.getAge();
-            passengerAsVector[5] = embarkedEncoding.get(passenger.getEmbarked());
-            passengerMatrix[i] = passengerAsVector;
-            i++;
+            //vector to passenger
+            Passenger passenger = new Passenger(Double.valueOf(passengerVector[2]).intValue(),
+                    Double.valueOf(passengerVector[1]).intValue(),
+                    Double.valueOf(passengerVector[0]).intValue(),
+                    keyFromValue( Double.valueOf(passengerVector[3]).intValue(), sexEncoding),
+                    Double.valueOf(passengerVector[4]).intValue(),
+                    keyFromValue( Double.valueOf(passengerVector[5]).intValue(), embarkedEncoding));
+            reconstructedPassengers.add(passenger);
         }
 
+        System.out.println(reconstructedPassengers.size());
+    }
+
+    private static void visualize(List<Passenger> passengers) {
         //from the matrix, we'll extract the age and the survived
         XYChart chart = new XYChartBuilder().width(800).height(600).build();
         chart.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Scatter);
@@ -127,25 +118,56 @@ public class Launcher {
         distributionPerPClass.addSeries("notSurvived", Arrays.asList("1st", "2nd","3rd"), new ArrayList(countOfNotSurvivedPerPclass.values()));
         distributionPerPClass.getStyler().setStacked(true);
         new SwingWrapper(distributionPerPClass).displayChart();
+    }
 
-        System.out.println(Arrays.deepToString(passengerMatrix));
-        // vector to passenger
+    private static double[][] getPassengersMatrix(List<Passenger> passengers, Map<String, Integer> sexEncoding, Map<String, Integer> embarkedEncoding) {
+        double[][] passengerMatrix = new double[passengers.size()][];
+        int i = 0;
+        for (Passenger passenger : passengers){
 
-        List<Passenger> reconstructedPassengers = new ArrayList<>();
-        for (double[] passengerVector : passengerMatrix){
-
-            //vector to passenger
-            Passenger passenger = new Passenger(Double.valueOf(passengerVector[2]).intValue(),
-                    Double.valueOf(passengerVector[1]).intValue(),
-                    Double.valueOf(passengerVector[0]).intValue(),
-                    keyFromValue( Double.valueOf(passengerVector[3]).intValue(), sexEncoding),
-                    Double.valueOf(passengerVector[4]).intValue(),
-                    keyFromValue( Double.valueOf(passengerVector[5]).intValue(), embarkedEncoding));
-            reconstructedPassengers.add(passenger);
+            //passenger to vector
+            double[] passengerAsVector = new double[6];
+            passengerAsVector[0] = passenger.getPassengerId();
+            passengerAsVector[1] = passenger.getSurvived();
+            passengerAsVector[2] = passenger.getPclass();
+            passengerAsVector[3] = sexEncoding.get(passenger.getSex());
+            passengerAsVector[4] = passenger.getAge();
+            passengerAsVector[5] = embarkedEncoding.get(passenger.getEmbarked());
+            passengerMatrix[i] = passengerAsVector;
+            i++;
         }
+        return passengerMatrix;
+    }
 
-        System.out.println(reconstructedPassengers.size());
+    private static List<Passenger> getPassengers(File file) throws IOException {
+        List<String> stringList = Files.readAllLines(file.toPath());
 
+
+        stringList.remove(0);
+        System.out.println(stringList);
+        List<Passenger> passengers = new ArrayList<>();
+
+        List<String> faultyPassengerIds = new ArrayList<>();
+        for (String line : stringList){
+            String[] parts = line.split(",");
+            System.out.println("pclass: " + parts[2]);
+
+            try {
+                Passenger p = new Passenger(Integer.parseInt(parts[2])
+                        , Integer.parseInt(parts[1])
+                        , Integer.parseInt(parts[0])
+                        , parts[3]
+                        , Integer.parseInt(parts[4])
+                        , parts[10]);
+                passengers.add(p);
+            }catch (Exception e){
+                e.printStackTrace();
+                faultyPassengerIds.add(parts[0]);
+            }
+        }
+        System.out.println(passengers);
+        System.out.println("faulty passengers size:" + faultyPassengerIds.size());
+        return passengers;
     }
 
     public static String keyFromValue(Integer value, Map<String, Integer> map){
