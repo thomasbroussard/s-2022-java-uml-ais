@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Launcher {
 
@@ -68,12 +69,15 @@ public class Launcher {
 
         //from the matrix, we'll extract the age and the survived
         XYChart chart = new XYChartBuilder().width(800).height(600).build();
+        chart.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Scatter);
         List<Double> xDataNotSurvived = new LinkedList<>();
         List<Double> yDataNotSurvived = new LinkedList<>();
         List<Double> xData = new LinkedList<>();
         List<Double> yData = new LinkedList<>();
         int survived = 0;
         int notSurvived = 0;
+
+
         for (Passenger passenger: passengers){
             if (passenger.getSurvived() == 0) {
                 xDataNotSurvived.add((double) passenger.getSurvived());
@@ -100,12 +104,29 @@ public class Launcher {
                         .build();
 
         distribution.addSeries("distribution", Arrays.asList("survived", "not survived"), Arrays.asList(survived, notSurvived));
-        new SwingWrapper(distribution).displayChart();
+
+        Map<Integer, Long> countOfSurvivedPerPclass = passengers.stream()
+                .filter(passenger -> passenger.getSurvived() == 1)
+                .collect(Collectors.groupingBy(Passenger::getPclass, Collectors.counting()));
+
+        System.out.println(countOfSurvivedPerPclass);
+        Map<Integer, Long> countOfNotSurvivedPerPclass = passengers.stream().filter(passenger -> passenger.getSurvived() == 0)
+                .collect(Collectors.groupingBy(Passenger::getPclass, Collectors.counting()));
 
 
+        CategoryChart distributionPerPClass =
+                new CategoryChartBuilder()
+                        .width(800)
+                        .height(600)
+                        .title("survived vs not survived")
+                        .xAxisTitle("Class")
+                        .yAxisTitle("Number")
+                        .build();
 
-
-
+        distributionPerPClass.addSeries("survived", Arrays.asList("1st", "2nd","3rd"), new ArrayList(countOfSurvivedPerPclass.values()));
+        distributionPerPClass.addSeries("notSurvived", Arrays.asList("1st", "2nd","3rd"), new ArrayList(countOfNotSurvivedPerPclass.values()));
+        distributionPerPClass.getStyler().setStacked(true);
+        new SwingWrapper(distributionPerPClass).displayChart();
 
         System.out.println(Arrays.deepToString(passengerMatrix));
         // vector to passenger
