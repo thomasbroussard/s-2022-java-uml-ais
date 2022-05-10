@@ -1,6 +1,7 @@
 package fr.epita.exercises.titanic.launcher;
 
 import fr.epita.exercises.titanic.datamodel.Passenger;
+import org.knowm.xchart.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +65,48 @@ public class Launcher {
             passengerMatrix[i] = passengerAsVector;
             i++;
         }
+
+        //from the matrix, we'll extract the age and the survived
+        XYChart chart = new XYChartBuilder().width(800).height(600).build();
+        List<Double> xDataNotSurvived = new LinkedList<>();
+        List<Double> yDataNotSurvived = new LinkedList<>();
+        List<Double> xData = new LinkedList<>();
+        List<Double> yData = new LinkedList<>();
+        int survived = 0;
+        int notSurvived = 0;
+        for (Passenger passenger: passengers){
+            if (passenger.getSurvived() == 0) {
+                xDataNotSurvived.add((double) passenger.getSurvived());
+                yDataNotSurvived.add((double) passenger.getAge());
+                notSurvived += 1;
+            } else {
+                xData.add((double) passenger.getSurvived());
+                yData.add((double) passenger.getAge());
+                survived += 1;
+            }
+        }
+
+        XYSeries seriesNotSurvived = chart.addSeries("not survived", xDataNotSurvived, yDataNotSurvived);
+        XYSeries seriesSurvived = chart.addSeries("survived", xData, yData);
+
+
+        CategoryChart distribution =
+                new CategoryChartBuilder()
+                        .width(800)
+                        .height(600)
+                        .title("survived vs not survived")
+                        .xAxisTitle("Score")
+                        .yAxisTitle("Number")
+                        .build();
+
+        distribution.addSeries("distribution", Arrays.asList("survived", "not survived"), Arrays.asList(survived, notSurvived));
+        new SwingWrapper(distribution).displayChart();
+
+
+
+
+
+
         System.out.println(Arrays.deepToString(passengerMatrix));
         // vector to passenger
 
