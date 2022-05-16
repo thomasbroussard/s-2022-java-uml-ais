@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Launcher {
 
@@ -41,8 +42,29 @@ public class Launcher {
 
         Image image = imageList.get(4);
         double[][] pixels = image.getPixels();
-        System.out.println(image.getDigit());
-        for (int i = 0 ; i < pixels.length; i ++){
+        showMatrix(image.getDigit(), pixels);
+
+        List<Image> nines = imageList.stream().filter(img -> img.getDigit() == 9).collect(Collectors.toList());
+        double[][] averageNine = new double[28][28];
+        int size = nines.size();
+        for (int i = 0; i < size; i++) {
+            double[][] currentPixels = nines.get(i).getPixels();
+            for (int k = 0; k< currentPixels.length; k++){
+                for (int j = 0; j < currentPixels[k].length; j++ ){
+                    averageNine[k][j] = averageNine[k][j] + currentPixels[k][j] / size;
+                }
+            }
+        }
+        showMatrix(9, averageNine);
+
+
+
+
+    }
+
+    private static void showMatrix(int digit, double[][] pixels) {
+        System.out.println(digit);
+        for (int i = 0; i < pixels.length; i ++){
             for (int j = 0; j < pixels[i].length; j++){
                 double v = pixels[i][j];
                 if (v > 127){
@@ -53,6 +75,5 @@ public class Launcher {
             }
             System.out.println();
         }
-
     }
 }
