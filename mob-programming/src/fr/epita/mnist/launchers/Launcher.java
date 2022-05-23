@@ -15,7 +15,7 @@ public class Launcher {
 
 
     public static void main(String[] args) throws FileNotFoundException {
-        File file = new File("mob-programming/resources/mnist_train_sample.csv");
+        File file = new File("C:\\Users\\Présentation\\Downloads\\mnist_train.csv");
 
 
         Scanner scanner = new Scanner(file);
